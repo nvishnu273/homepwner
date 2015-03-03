@@ -40,4 +40,6 @@
 
 //@property NSString *itemName; //SAME as doing all of these things above for _itemName.
 
+@property (nonatomic, copy) NSString*   itemKey;
+
 @end

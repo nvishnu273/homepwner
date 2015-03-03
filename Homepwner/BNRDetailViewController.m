@@ -9,8 +9,12 @@
 #import "BNRDetailViewController.h"
 
 #import "BNRItem.h"
+#import "BNRImageStore.h"
 
-@interface BNRDetailViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+@interface BNRDetailViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate,
+    UITextFieldDelegate>
+
+- (IBAction)backgroundTapped:(id)sender;
 
 @property (weak, nonatomic) IBOutlet UITextField *nameField;
 @property (weak, nonatomic) IBOutlet UITextField *serialNumberField;
@@ -33,6 +37,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - view life cycle
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
@@ -50,6 +55,10 @@
     }
     
     self.dateLabel.text = [dateFormatter stringFromDate:item.dateCreated];
+    
+    NSString *key = self.item.itemKey;
+    UIImage *imageToDisplay = [[BNRImageStore sharedStore] imageForKey:key];
+    self.imageView.image = imageToDisplay;
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -83,6 +92,7 @@
 }
 */
 
+#pragma mark - Actions
 - (IBAction)takePicture:(id)sender
 {
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
@@ -100,10 +110,24 @@
     [self presentViewController:imagePicker animated:YES completion:NULL];
 }
 
+- (IBAction)backgroundTapped:(id)sender
+{
+    [self.view endEditing:YES];
+}
+
+#pragma mark Image Picker
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     UIImage *image = info [UIImagePickerControllerOriginalImage];
+    [[BNRImageStore sharedStore] setImage:image forKey:self.item.itemKey];
     self.imageView.image = image;
     [self dismissViewControllerAnimated:YES completion:NULL];
+}
+
+#pragma mark Dismiss Keyboard
+-(BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    return YES;
 }
 @end
